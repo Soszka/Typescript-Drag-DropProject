@@ -127,15 +127,10 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     insertAtStart: boolean,
     newElementId?: string
   ) {
-    this.templateElement = document.getElementById(
-      templateId
-    )! as HTMLTemplateElement;
+    this.templateElement = document.getElementById(templateId)! as HTMLTemplateElement;
     this.hostElement = document.getElementById(hostElementId)! as T;
 
-    const importedNode = document.importNode(
-      this.templateElement.content,
-      true
-    );
+    const importedNode = document.importNode(this.templateElement.content,true);
     this.element = importedNode.firstElementChild as U;
     if (newElementId) {
       this.element.id = newElementId;
@@ -153,6 +148,27 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 
   abstract configure(): void;
   abstract renderContent(): void;
+}
+
+// ProjectItem Class
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  private project: Project;
+
+  constructor(hostId: string, project: Project) {
+    super('single-project', hostId, false, project.id);
+    this.project = project;
+
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {}
+
+  renderContent() {
+    this.element.querySelector('h2')!.textContent = this.project.title;
+    this.element.querySelector('h3')!.textContent = this.project.people.toString();
+    this.element.querySelector('p')!.textContent = this.project.description;
+  }
 }
 
 // ProjectList Class
@@ -188,14 +204,10 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
   }
 
   private renderProjects() {
-    const listEl = document.getElementById(
-      `${this.type}-projects-list`
-    )! as HTMLUListElement;
+    const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
     listEl.innerHTML = '';
     for (const prjItem of this.assignedProjects) {
-      const listItem = document.createElement('li');
-      listItem.textContent = prjItem.title;
-      listEl.appendChild(listItem);
+      new ProjectItem(this.element.querySelector('ul')!.id, prjItem);
     }
   }
 }
@@ -208,15 +220,9 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
 
   constructor() {
     super('project-input', 'app', true, 'user-input');
-    this.titleInputElement = this.element.querySelector(
-      '#title'
-    ) as HTMLInputElement;
-    this.descriptionInputElement = this.element.querySelector(
-      '#description'
-    ) as HTMLInputElement;
-    this.peopleInputElement = this.element.querySelector(
-      '#people'
-    ) as HTMLInputElement;
+    this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement;
+    this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement;
+    this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
     this.configure();
   }
 
